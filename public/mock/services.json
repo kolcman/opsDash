@@ -1,0 +1,5 @@
+[
+  { "name": "nginx", "status": "up" },
+  { "name": "postgres", "status": "degraded" },
+  { "name": "redis", "status": "down" }
+]

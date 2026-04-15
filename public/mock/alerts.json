@@ -1,0 +1,14 @@
+[
+  {
+    "id": "a-1",
+    "title": "Redis unavailable",
+    "severity": "critical",
+    "message": "Service redis is down for more than 2 minutes."
+  },
+  {
+    "id": "a-2",
+    "title": "High RAM usage",
+    "severity": "warning",
+    "message": "RAM usage reached 80% threshold."
+  }
+]
