@@ -81,3 +81,11 @@ Dockerfile
 - Подключить `services` и `alerts` к реальным данным (targets/alert rules)
 - Добавить Grafana (дашборды + алертинг)
 - HTTPS + домен (reverse proxy на хосте или в контейнере)
+
+## Изменения (апрель 2026)
+
+- Добавлен Go backend (`/api/metrics`, `/api/services`, `/api/alerts`, `/healthz`)
+- Добавлен Docker Compose для запуска фронта + бэка
+- Подключены Prometheus + node_exporter для реальных CPU/RAM метрик
+- Фронт переведён на `/api` (с опциональным `VITE_API_BASE_URL`) и добавлен dev proxy в Vite
+- Улучшены hover-эффекты в glass-стиле для карточек и кнопок
