@@ -54,6 +54,10 @@ const hasCriticalAlerts = computed(() => props.alerts.some((item) => item.severi
   min-height: auto;
   display: flex;
   flex-direction: column;
+  transition:
+    transform 0.26s ease,
+    border-color 0.26s ease,
+    box-shadow 0.26s ease;
 }
 
 .card::before {
@@ -159,6 +163,18 @@ const hasCriticalAlerts = computed(() => props.alerts.some((item) => item.severi
 
 .alert__severity--critical {
   color: #fda4af;
+}
+
+@media (hover: hover) {
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow:
+      0 28px 50px -28px rgba(0, 0, 0, 0.95),
+      0 0 0 1px rgba(251, 191, 36, 0.14),
+      0 0 18px rgba(251, 191, 36, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+  }
 }
 
 @media (max-width: 720px) {

@@ -213,6 +213,11 @@ onUnmounted(() => {
 
 .preview-switch__button:hover {
   color: #f8fafc;
+  background: rgba(186, 230, 253, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    0 10px 18px -14px rgba(125, 211, 252, 0.9);
+  transform: translateY(-1px);
 }
 
 .preview-switch__button--active {

@@ -1,0 +1,42 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    environment:
+      - PORT=8080
+      - PROMETHEUS_URL=http://prometheus:9090
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
+  web:
+    build:
+      context: .
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v2.53.1
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=7d
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    restart: unless-stopped
+
+  node-exporter:
+    image: prom/node-exporter:v1.8.1
+    command:
+      - --path.rootfs=/host
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/host:ro
+    restart: unless-stopped
+
+volumes:
+  prometheus-data:

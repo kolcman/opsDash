@@ -17,6 +17,10 @@ coverage
 .env.*
 !.env.example
 
+# Go build artifacts
+/backend/opsdash-backend
+/backend/*.exe
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

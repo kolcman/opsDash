@@ -54,6 +54,10 @@ const totalLabel = computed(() => `${props.services.length} services`)
   min-height: 280px;
   display: flex;
   flex-direction: column;
+  transition:
+    transform 0.26s ease,
+    border-color 0.26s ease,
+    box-shadow 0.26s ease;
 }
 
 .card::before {
@@ -153,6 +157,22 @@ const totalLabel = computed(() => `${props.services.length} services`)
 .empty-state {
   margin: 0;
   color: rgba(203, 213, 225, 0.8);
+}
+
+@media (hover: hover) {
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(186, 230, 253, 0.34);
+    background:
+      linear-gradient(160deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.06)),
+      rgba(8, 12, 24, 0.52);
+    box-shadow:
+      0 28px 50px -28px rgba(0, 0, 0, 0.95),
+      0 0 0 1px rgba(125, 211, 252, 0.14),
+      0 0 18px rgba(125, 211, 252, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+  }
 }
 
 @media (max-width: 720px) {

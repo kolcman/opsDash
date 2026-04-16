@@ -69,6 +69,10 @@ const formattedUpdatedAt = computed(() => {
   min-height: 280px;
   display: flex;
   flex-direction: column;
+  transition:
+    transform 0.26s ease,
+    border-color 0.26s ease,
+    box-shadow 0.26s ease;
 }
 
 .card::before {
@@ -163,6 +167,22 @@ const formattedUpdatedAt = computed(() => {
   background: linear-gradient(90deg, #22d3ee, #60a5fa);
   box-shadow: 0 0 16px rgba(56, 189, 248, 0.65);
   transition: width 0.4s ease;
+}
+
+@media (hover: hover) {
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(186, 230, 253, 0.34);
+    background:
+      linear-gradient(160deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.06)),
+      rgba(8, 12, 24, 0.52);
+    box-shadow:
+      0 28px 50px -28px rgba(0, 0, 0, 0.95),
+      0 0 0 1px rgba(125, 211, 252, 0.14),
+      0 0 18px rgba(125, 211, 252, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+  }
 }
 
 .progress__fill--violet {

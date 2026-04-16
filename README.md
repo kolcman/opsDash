@@ -1,87 +1,83 @@
-# OpsDash Frontend
+# OpsDash
 
-Мини-дэшборд для мониторинга сервера на Vue 3.  
-Проект отображает метрики, статусы сервисов и алерты в стиле dark glass UI.
+Мини-дэшборд для мониторинга сервера (Vue 3 + Go) в стиле dark glass UI.  
+Сейчас проект поднимается одной командой через Docker Compose и показывает **реальные CPU/RAM метрики** с хоста через **Prometheus + node_exporter**.
 
-## Что реализовано
+## Что внутри
 
-- Карточка метрик CPU/RAM с прогресс-барами
-- Карточка статусов сервисов (`up`, `down`, `degraded`) с цветными бейджами
-- Карточка алертов с подсветкой critical-состояний
-- Mock API-данные из `public/mock/*.json`
-- Загрузка данных через `Axios`
-- Автообновление данных каждые 10 секунд
-- Адаптив и dev-переключатель режимов: `Auto / Phone / Tablet / Desktop`
+- **UI (Vue)**: карточки метрик/сервисов/алертов, автообновление каждые 10 секунд
+- **API (Go)**: `/api/*` эндпоинты для дэшборда
+- **Monitoring**: `prometheus` + `node-exporter` (метрики хоста)
+- **Reverse proxy**: nginx (раздаёт SPA и проксирует `/api/*` в backend)
 
-## Стек
+## Быстрый старт (рекомендуется)
 
-- Vue 3 + Vite
-- TypeScript
-- Axios
-- Pinia (установлен, можно использовать на следующих этапах)
-- Vue Router (установлен, пока без маршрутов)
+Требования: Docker + Docker Compose plugin.
 
-## Структура проекта
-
-```text
-src/
-  components/
-    AlertsCard.vue
-    MetricsCard.vue
-    ServicesCard.vue
-  services/
-    dashboardApi.ts
-  types/
-    dashboard.ts
-  App.vue
-  main.ts
-
-public/
-  mock/
-    alerts.json
-    metrics.json
-    services.json
+```bash
+docker compose up -d --build
 ```
 
-## Запуск
+После запуска:
 
-Установка зависимостей:
+- **UI**: `http://<server-ip>/`
+- **API**: `http://<server-ip>/api/metrics`
+
+Проверка:
+
+```bash
+curl -s http://<server-ip>/api/metrics
+```
+
+## Эндпоинты API
+
+- `GET /api/metrics` — CPU/RAM (из Prometheus)
+- `GET /api/services` — статусы сервисов (пока демо)
+- `GET /api/alerts` — алерты (пока демо)
+- `GET /healthz` — healthcheck backend
+
+## Локальная разработка (без Docker)
+
+### Frontend
 
 ```bash
 npm install
-```
-
-Режим разработки:
-
-```bash
 npm run dev
 ```
 
-Проверка типов:
+По умолчанию фронт ходит на `/api`. В dev-режиме это проксируется на `http://localhost:8080` через `vite.config.ts`.
+
+### Backend
 
 ```bash
-npm run type-check
+cd backend
+go run .
 ```
 
-Production build:
+По умолчанию backend слушает `:8080` (можно переопределить через `PORT`).
 
-```bash
-npm run build
+## Реальные метрики: Prometheus + node_exporter
+
+В `docker-compose.yml` добавлены сервисы:
+
+- `node-exporter` — снимает метрики хоста
+- `prometheus` — скрапит `node-exporter` и отдаёт API
+
+Backend читает Prometheus через `PROMETHEUS_URL` и строит CPU/RAM через PromQL.
+
+## Структура репозитория
+
+```text
+backend/          # Go API
+nginx/            # nginx config (SPA + /api proxy)
+prometheus/       # Prometheus config
+src/              # Vue frontend
+docker-compose.yml
+Dockerfile
 ```
 
-## Откуда берутся данные
+## Roadmap
 
-Сейчас приложение работает на моках:
-
-- `/mock/metrics.json`
-- `/mock/services.json`
-- `/mock/alerts.json`
-
-Запросы выполняются через `src/services/dashboardApi.ts`.
-
-## Следующие шаги (roadmap)
-
-- Добавить `VITE_API_BASE_URL` для гибкого переключения источника данных
-- Подключить Go backend (`/api/metrics`, `/api/services`, `/api/alerts`)
-- Подготовить Dockerfile и docker-compose
-- Интегрировать Prometheus/node_exporter
+- Подключить `services` и `alerts` к реальным данным (targets/alert rules)
+- Добавить Grafana (дашборды + алертинг)
+- HTTPS + домен (reverse proxy на хосте или в контейнере)
