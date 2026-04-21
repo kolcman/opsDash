@@ -21,6 +21,9 @@ coverage
 /backend/opsdash-backend
 /backend/*.exe
 
+# Local release/archive artifacts
+*.tar.gz
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

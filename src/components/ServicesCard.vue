@@ -4,6 +4,7 @@ import type { ServiceStatus } from '../types/dashboard'
 
 const props = defineProps<{
   services: ServiceStatus[]
+  lang: 'en' | 'ru'
 }>()
 
 const statusClassMap: Record<ServiceStatus['status'], string> = {
@@ -12,21 +13,31 @@ const statusClassMap: Record<ServiceStatus['status'], string> = {
   degraded: 'status status--degraded',
 }
 
-const totalLabel = computed(() => `${props.services.length} services`)
+const totalLabelLocalized = computed(() =>
+  props.lang === 'ru' ? `${props.services.length} сервисов` : `${props.services.length} services`,
+)
+
+const statusLabelMap: Record<ServiceStatus['status'], { en: string; ru: string }> = {
+  up: { en: 'up', ru: 'работает' },
+  down: { en: 'down', ru: 'недоступен' },
+  degraded: { en: 'degraded', ru: 'деградация' },
+}
 </script>
 
 <template>
   <article class="card" aria-label="Services status card">
     <div class="card__head">
-      <h2>Services</h2>
-      <span class="chip chip--muted">{{ totalLabel }}</span>
+      <h2>{{ lang === 'ru' ? 'Сервисы' : 'Services' }}</h2>
+      <span class="chip chip--muted">{{ totalLabelLocalized }}</span>
     </div>
 
-    <p v-if="services.length === 0" class="empty-state">No services configured yet.</p>
+    <p v-if="services.length === 0" class="empty-state">
+      {{ lang === 'ru' ? 'Сервисы пока не настроены.' : 'No services configured yet.' }}
+    </p>
     <ul v-else class="list" aria-label="Service statuses">
       <li v-for="service in services" :key="service.name" class="list__row">
         <span class="service-name">{{ service.name }}</span>
-        <strong :class="statusClassMap[service.status]">{{ service.status }}</strong>
+        <strong :class="statusClassMap[service.status]">{{ statusLabelMap[service.status][lang] }}</strong>
       </li>
     </ul>
   </article>

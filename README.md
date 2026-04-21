@@ -6,6 +6,8 @@
 ## Что внутри
 
 - **UI (Vue)**: карточки метрик/сервисов/алертов, автообновление каждые 10 секунд
+- **Режимы экрана**: `Monitoring` и `Config Generator`
+- **Переключение языка**: `ENG/RU` (адаптировано для desktop/tablet/mobile)
 - **API (Go)**: `/api/*` эндпоинты для дэшборда
 - **Monitoring**: `prometheus` + `node-exporter` (метрики хоста)
 - **Reverse proxy**: nginx (раздаёт SPA и проксирует `/api/*` в backend)
@@ -35,6 +37,23 @@ curl -s http://<server-ip>/api/metrics
 - `GET /api/services` — статусы сервисов (пока демо)
 - `GET /api/alerts` — алерты (пока демо)
 - `GET /healthz` — healthcheck backend
+
+## Режим Config Generator
+
+Встроенный генератор конфигов помогает быстро собрать шаблон без ручного написания с нуля.
+
+Поддерживаемые шаблоны:
+
+- `nginx`
+- `docker-compose`
+- `alertmanager.yml`
+
+Функции:
+
+- форма с полями
+- live preview
+- копирование результата в буфер
+- всплывающие подсказки у каждого поля (понятные даже для новичка)
 
 ## Локальная разработка (без Docker)
 
@@ -81,6 +100,7 @@ Dockerfile
 - Подключить `services` и `alerts` к реальным данным (targets/alert rules)
 - Добавить Grafana (дашборды + алертинг)
 - HTTPS + домен (reverse proxy на хосте или в контейнере)
+- Добавить экспорт сгенерированного конфига в файл (`.conf` / `.yml`)
 
 ## Изменения (апрель 2026)
 

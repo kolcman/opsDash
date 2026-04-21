@@ -4,6 +4,7 @@ import type { AlertItem } from '../types/dashboard'
 
 const props = defineProps<{
   alerts: AlertItem[]
+  lang: 'en' | 'ru'
 }>()
 
 const hasCriticalAlerts = computed(() => props.alerts.some((item) => item.severity === 'critical'))
@@ -12,12 +13,16 @@ const hasCriticalAlerts = computed(() => props.alerts.some((item) => item.severi
 <template>
   <article class="card card--alerts" :class="{ 'card--critical': hasCriticalAlerts }" aria-label="Alerts card">
     <div class="card__head">
-      <h2>Alerts</h2>
-      <span v-if="hasCriticalAlerts" class="chip chip--danger">critical active</span>
-      <span v-else class="chip chip--ok">all good</span>
+      <h2>{{ lang === 'ru' ? 'Алерты' : 'Alerts' }}</h2>
+      <span v-if="hasCriticalAlerts" class="chip chip--danger">
+        {{ lang === 'ru' ? 'есть critical' : 'critical active' }}
+      </span>
+      <span v-else class="chip chip--ok">{{ lang === 'ru' ? 'все в норме' : 'all good' }}</span>
     </div>
 
-    <p v-if="alerts.length === 0" class="empty-state">No active alerts. System looks stable.</p>
+    <p v-if="alerts.length === 0" class="empty-state">
+      {{ lang === 'ru' ? 'Активных алертов нет. Система стабильна.' : 'No active alerts. System looks stable.' }}
+    </p>
     <ul v-else class="list" aria-label="Alert list">
       <li v-for="alert in alerts" :key="alert.id" class="alert">
         <div class="alert__head">

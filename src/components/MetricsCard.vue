@@ -4,6 +4,7 @@ import type { Metrics } from '../types/dashboard'
 
 const props = defineProps<{
   metrics: Metrics | null
+  lang: 'en' | 'ru'
 }>()
 
 const formattedUpdatedAt = computed(() => {
@@ -25,7 +26,7 @@ const formattedUpdatedAt = computed(() => {
   <article class="card" aria-label="System metrics card">
     <div class="card__head">
       <h2>CPU / RAM</h2>
-      <span class="chip chip--muted">System</span>
+      <span class="chip chip--muted">{{ lang === 'ru' ? 'Система' : 'System' }}</span>
     </div>
     <div class="stats" role="list" aria-label="CPU and RAM metrics">
       <div class="stat" role="listitem">
@@ -43,7 +44,7 @@ const formattedUpdatedAt = computed(() => {
         </div>
       </div>
     </div>
-    <p class="meta">Updated {{ formattedUpdatedAt }}</p>
+    <p class="meta">{{ lang === 'ru' ? 'Обновлено' : 'Updated' }} {{ formattedUpdatedAt }}</p>
   </article>
 </template>
 

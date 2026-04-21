@@ -1,20 +1,24 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
 import AlertsCard from './components/AlertsCard.vue'
+import ConfigGeneratorCard from './components/ConfigGeneratorCard.vue'
 import MetricsCard from './components/MetricsCard.vue'
 import ServicesCard from './components/ServicesCard.vue'
 import { fetchAlerts, fetchMetrics, fetchServices } from './services/dashboardApi'
 import type { AlertItem, Metrics, ServiceStatus } from './types/dashboard'
-type PreviewMode = 'auto' | 'phone' | 'tablet' | 'desktop'
+type DashboardMode = 'monitoring' | 'generator'
+type Lang = 'en' | 'ru'
 
 const metrics = ref<Metrics | null>(null)
 const services = ref<ServiceStatus[]>([])
 const alerts = ref<AlertItem[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
-const previewMode = ref<PreviewMode>('auto')
+const dashboardMode = ref<DashboardMode>('monitoring')
+const lang = ref<Lang>('en')
 let pollTimer: ReturnType<typeof setInterval> | null = null
-const previewModes: PreviewMode[] = ['auto', 'phone', 'tablet', 'desktop']
+const dashboardModes: DashboardMode[] = ['monitoring', 'generator']
+const langs: Lang[] = ['en', 'ru']
 
 async function loadDashboardData() {
   try {
@@ -47,41 +51,88 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <main class="page" :class="`page--${previewMode}`">
+  <main class="page page--auto">
     <div class="ambient ambient--top"></div>
     <div class="ambient ambient--bottom"></div>
 
     <header class="page__header">
       <div>
-        <p class="eyebrow">Infrastructure</p>
+        <p class="eyebrow">{{ lang === 'ru' ? 'Инфраструктура' : 'Infrastructure' }}</p>
         <h1>OpsDash</h1>
-        <p class="subtitle">Liquid glass dashboard for live server health</p>
+        <p class="subtitle">
+          {{
+            lang === 'ru' ? 'Инструменты DevOps' : 'DevOps tools'
+          }}
+        </p>
       </div>
-      <span class="chip chip--live">Live every 10s</span>
+      <div class="header-controls">
+        <span class="chip chip--live">{{ lang === 'ru' ? 'Обновление каждые 10с' : 'Live every 10s' }}</span>
+        <section class="lang-switch lang-switch--mobile" aria-label="Language switch mobile">
+          <button
+            v-for="currentLang in langs"
+            :key="`mobile-${currentLang}`"
+            type="button"
+            class="lang-switch__button"
+            :class="{ 'lang-switch__button--active': lang === currentLang }"
+            @click="lang = currentLang"
+          >
+            {{ currentLang.toUpperCase() }}
+          </button>
+        </section>
+      </div>
     </header>
 
-    <section class="preview-switch" aria-label="Breakpoint preview mode">
-      <button
-        v-for="mode in previewModes"
-        :key="mode"
-        type="button"
-        class="preview-switch__button"
-        :class="{ 'preview-switch__button--active': previewMode === mode }"
-        @click="previewMode = mode"
-      >
-        {{ mode }}
-      </button>
+    <section class="switch-row">
+      <section class="mode-switch" aria-label="Dashboard mode">
+        <button
+          v-for="mode in dashboardModes"
+          :key="mode"
+          type="button"
+          class="mode-switch__button"
+          :class="{ 'mode-switch__button--active': dashboardMode === mode }"
+          @click="dashboardMode = mode"
+        >
+          {{
+            mode === 'monitoring'
+              ? lang === 'ru'
+                ? 'Мониторинг'
+                : 'Monitoring'
+              : lang === 'ru'
+                ? 'Генератор конфигов'
+                : 'Config Generator'
+          }}
+        </button>
+      </section>
+
+      <section class="lang-switch lang-switch--desktop" aria-label="Language switch">
+        <button
+          v-for="currentLang in langs"
+          :key="currentLang"
+          type="button"
+          class="lang-switch__button"
+          :class="{ 'lang-switch__button--active': lang === currentLang }"
+          @click="lang = currentLang"
+        >
+          {{ currentLang.toUpperCase() }}
+        </button>
+      </section>
     </section>
 
     <section v-if="loading" class="skeleton-grid" aria-label="Loading dashboard">
-      <article v-for="item in 3" :key="item" class="skeleton-card"></article>
+      <article v-for="item in dashboardMode === 'monitoring' ? 3 : 1" :key="item" class="skeleton-card"></article>
     </section>
-    <p v-else-if="error" class="state state--error">Failed to load dashboard: {{ error }}</p>
+    <p v-else-if="error" class="state state--error">
+      {{ lang === 'ru' ? 'Не удалось загрузить дашборд:' : 'Failed to load dashboard:' }} {{ error }}
+    </p>
 
-    <section v-else class="grid">
-      <MetricsCard :metrics="metrics" />
-      <ServicesCard :services="services" />
-      <AlertsCard :alerts="alerts" />
+    <section v-else-if="dashboardMode === 'monitoring'" class="grid">
+      <MetricsCard :metrics="metrics" :lang="lang" />
+      <ServicesCard :services="services" :lang="lang" />
+      <AlertsCard :alerts="alerts" :lang="lang" />
+    </section>
+
+    <section v-else class="grid grid--generator">
+      <ConfigGeneratorCard :lang="lang" />
     </section>
   </main>
 </template>
@@ -103,6 +154,7 @@ onUnmounted(() => {
 .page {
   max-width: 1440px;
   width: min(1440px, 100%);
+  box-sizing: border-box;
   margin: 0 auto;
   min-height: 100dvh;
   padding: 30px 16px 42px;
@@ -152,6 +204,22 @@ onUnmounted(() => {
   z-index: 1;
 }
 
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+}
+
 .eyebrow {
   margin: 0 0 6px;
   text-transform: uppercase;
@@ -184,8 +252,10 @@ onUnmounted(() => {
   z-index: 1;
 }
 
-.preview-switch {
+.mode-switch {
   display: inline-flex;
+  box-sizing: border-box;
+  max-width: 100%;
   align-items: center;
   gap: 6px;
   padding: 5px;
@@ -193,12 +263,46 @@ onUnmounted(() => {
   border: 1px solid rgba(255, 255, 255, 0.18);
   background: rgba(15, 23, 42, 0.45);
   backdrop-filter: blur(14px);
-  margin-bottom: 16px;
+  margin: 0;
   position: relative;
   z-index: 1;
 }
 
-.preview-switch__button {
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(15, 23, 42, 0.35);
+  margin: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.lang-switch--mobile {
+  display: none;
+}
+
+.lang-switch__button {
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(226, 232, 240, 0.74);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 5px 9px;
+  cursor: pointer;
+}
+
+.lang-switch__button--active {
+  background: rgba(125, 211, 252, 0.22);
+  color: #e0f2fe;
+}
+
+.mode-switch__button {
   border: 0;
   border-radius: 999px;
   background: transparent;
@@ -211,21 +315,17 @@ onUnmounted(() => {
   transition: all 0.2s ease;
 }
 
-.preview-switch__button:hover {
+.mode-switch__button:hover {
   color: #f8fafc;
   background: rgba(186, 230, 253, 0.12);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.24),
-    0 10px 18px -14px rgba(125, 211, 252, 0.9);
-  transform: translateY(-1px);
 }
 
-.preview-switch__button--active {
+.mode-switch__button--active {
   background: rgba(125, 211, 252, 0.22);
   color: #e0f2fe;
 }
 
-.preview-switch__button:focus-visible {
+.mode-switch__button:focus-visible {
   outline: 2px solid rgba(125, 211, 252, 0.9);
   outline-offset: 2px;
 }
@@ -267,6 +367,16 @@ onUnmounted(() => {
   gap: 24px;
   position: relative;
   z-index: 1;
+}
+
+.grid--generator {
+  width: min(1240px, 100%);
+}
+
+.grid--generator :deep(.card--generator) {
+  flex: 1 1 100%;
+  width: 100%;
+  max-width: none;
 }
 
 .card {
@@ -602,7 +712,24 @@ onUnmounted(() => {
     grid-template-columns: 1fr;
   }
 
-  .preview-switch {
+  .mode-switch {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .switch-row {
+    margin-bottom: 12px;
+  }
+
+  .lang-switch--desktop {
+    display: none;
+  }
+
+  .lang-switch--mobile {
+    display: inline-flex;
+  }
+
+  .header-controls {
     width: 100%;
     justify-content: space-between;
   }
@@ -725,7 +852,7 @@ onUnmounted(() => {
   grid-template-columns: 1fr;
 }
 
-.page--phone .preview-switch {
+.page--phone .mode-switch {
   width: 100%;
   justify-content: space-between;
 }
@@ -889,8 +1016,19 @@ onUnmounted(() => {
 
   .page--auto .grid > .card:not(.card--alerts),
   .page--auto .skeleton-grid > .skeleton-card {
-    flex: 1 1 360px;
-    max-width: 420px;
+    flex: 1 1 300px;
+    max-width: 340px;
+  }
+
+  .page--auto .grid--generator > * {
+    flex: 1 1 100%;
+    max-width: none;
+  }
+
+  .page--auto .grid.grid--generator > .card.card--generator {
+    flex: 1 1 100%;
+    width: 100%;
+    max-width: none;
   }
 
   .page--auto .card--alerts {
@@ -965,6 +1103,16 @@ onUnmounted(() => {
     grid-row: 1;
     align-self: start;
     min-height: fit-content;
+  }
+
+  .page--auto .grid--generator {
+    display: flex;
+    width: min(1240px, 100%);
+  }
+
+  .page--auto .grid--generator > * {
+    flex: 1 1 100%;
+    max-width: none;
   }
 
   .page--auto .stats {
